@@ -1,17 +1,11 @@
 import tkinter as tk
+from tkinter import simpledialog
 root = tk.Tk()
 root.title("Unicode PB")
 
 global value, max_value
 value = 50
 max_value = 100
-
-# changes the text in the output bar
-def set_new_bar(insert):
-	output_box.config(state='normal')
-	output_box.delete(0, "end")
-	output_box.insert(0, insert)
-	output_box.config(state='disabled')
 
 # updates the values according to ones set in text boxes
 def update_from_box():
@@ -28,6 +22,7 @@ def generate():
 	else:
 		repeat_amount = cutup * 100
 		looptimes = 1
+		global barstring
 		barstring = '█'
 		# adds black sections to progress bar
 		while looptimes < repeat_amount:
@@ -51,13 +46,16 @@ def generate():
 		while looptimes < empty_repeat_amount:
 			barstring = barstring + '░'
 			looptimes += 1
-		set_new_bar(barstring)
+		copy_to_clipboard()
 
 # copies text to the clipboard
 def copy_to_clipboard():
 	root.clipboard_clear()
-	root.clipboard_append(output_box.get())
+	root.clipboard_append(barstring)
 	root.update()
+	if confirmation.get() == "on":
+		# shows a popup confirming text has been copied
+		tk.messagebox.showinfo(title="Success!", message="Copied to clipboard!")
 
 # boxes for the settings
 # value
@@ -70,12 +68,14 @@ default_max_value = tk.DoubleVar(value=100)
 tk.Label(root, text="Max").grid(column=0, row=1)
 max_box = tk.Spinbox(root, width=10, textvariable=default_max_value, command=generate)
 max_box.grid(column=1, row=1)
+# checkbox to enable showing popup when copied to clipboard
+confirmation = tk.StringVar()
+check_box = tk.Checkbutton(root, text="MSG", variable=confirmation, onvalue="on", offvalue="off")
+check_box.grid(column=0, row=2)
+confirmation.set("on")
 
-# copy to clipboard
-tk.Label(root, text="Clipboard").grid(column=0, row=2)
-tk.Button(root, command=copy_to_clipboard, text="Copy").grid(column=1, row=2)
 
-output_box = tk.Entry(root, width=130, font=("Arial", 9), state='disabled')
-output_box.grid(column=2, row=2)
+# generate
+tk.Button(root, command=generate, text="Generate").grid(column=1, row=2)
 
 root.mainloop()
